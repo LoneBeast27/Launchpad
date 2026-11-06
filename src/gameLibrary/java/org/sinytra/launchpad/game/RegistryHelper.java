@@ -24,7 +24,7 @@ import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.neoforge.common.CreativeModeTabRegistry;
 import net.neoforged.neoforge.common.tooltip.ItemTooltipHandler;
 import net.neoforged.neoforge.event.entity.EntityAttributeModificationEvent;
-import net.neoforged.neoforge.registries.DataPackRegistryEvent;
+import net.neoforged.neoforge.registries.NewDatapackRegistryEvent;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import org.slf4j.Logger;
 
@@ -38,11 +38,11 @@ public class RegistryHelper {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public static void postSetup() {
-        // Post DataPackRegistryEvent.NewRegistry
+        // Post NewDatapackRegistryEvent
         try {
             postDataPackRegistryEvent();
         } catch (Exception e) {
-            LOGGER.error("Error posting DataPackRegistryEvent.NewRegistry event", e);
+            LOGGER.error("Error posting NewDatapackRegistryEvent", e);
         }
 
         // Post RegisterEvent for COMMAND_ARGUMENT_TYPE
@@ -77,10 +77,13 @@ public class RegistryHelper {
     private static void postDataPackRegistryEvent() throws Exception {
         ModContainer container = ModList.get().getModContainerById("fabric_registry_sync_v0").orElse(null);
         if (container != null) {
-            DataPackRegistryEvent.NewRegistry event = new DataPackRegistryEvent.NewRegistry();
+            // NeoForge 26.3: DataPackRegistryEvent.NewRegistry -> NewDatapackRegistryEvent (package-private constructor)
+            Constructor<NewDatapackRegistryEvent> ctr = NewDatapackRegistryEvent.class.getDeclaredConstructor();
+            ctr.setAccessible(true);
+            NewDatapackRegistryEvent event = ctr.newInstance();
             container.getEventBus().post(event);
 
-            Method method = DataPackRegistryEvent.NewRegistry.class.getDeclaredMethod("process");
+            Method method = NewDatapackRegistryEvent.class.getDeclaredMethod("process");
             method.setAccessible(true);
             method.invoke(event);
         }
