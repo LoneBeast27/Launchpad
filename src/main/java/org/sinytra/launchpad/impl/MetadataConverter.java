@@ -116,6 +116,12 @@ public final class MetadataConverter {
                     continue;
                 }
 
+                // NeoForge 26.3 bundles MixinExtras as a plain library rather than as a mod, so a 'mixinextras'
+                // mod dependency can never be satisfied by FML's sorter. It is always provided by NeoForge.
+                if (dependency.getModId().equals("mixinextras")) {
+                    continue;
+                }
+
                 if (dependency.getModId().equals("fabricloader")) {
                     features.add("fabricLoader", VersionConverter.convert(dependency.getVersionRequirements()));
                     continue;
