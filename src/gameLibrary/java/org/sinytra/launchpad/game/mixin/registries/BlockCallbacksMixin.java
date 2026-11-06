@@ -19,7 +19,8 @@ public class BlockCallbacksMixin {
     // Not doing so will create an inconsistency between server and client registries
     // Both will count each block twice during setup, but the client resets its counter when applying the server snapshot
     // So the server will end up sending an ID like 57797 to the client which only knows IDs up to 46893
-    @Inject(method = "onBake", at = @At(value = "INVOKE", target = "Ljava/util/Set;clear()V"))
+    // NeoForge 26.3 moved addedBlocks.clear() into a SolidDebugger lambda; HEAD is equivalent (the id map is only rebuilt afterwards)
+    @Inject(method = "onBake", at = @At("HEAD"))
     private void clearIdMapBeforeBake(Registry<Block> registry, CallbackInfo ci) {
         // Clear BLOCKSTATE_TO_ID_MAP
         ((ClearCallback<Block>) this).onClear(registry, false);
